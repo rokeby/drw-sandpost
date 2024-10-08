@@ -48,7 +48,6 @@ def ensure_file_exists(file_path, initial_content=None):
                 f.write(initial_content + '\n')
         print(f"Created file: {file_path}")
 
-
 def get_recipient_emails(mail_list_file, unsubscribe_list_file):
     """Read the mail list and remove any emails present in the unsubscribe list."""
     # Ensure mail-list and unsubscribe-list files exist
@@ -96,7 +95,7 @@ def send_email(package):
     body = f"""
     <p><i>{package['report']}</i></p>
     <p>{datetime.now()}</p>
-    <p><a href="https://unsubscribe.link">Unsubscribe link</a></p>
+    <p><a href="https://unsubscribe.link">unsubscribe from sandpost</a></p>
     """
 
     # Attach the HTML body to the email message
@@ -159,7 +158,6 @@ creatures = data.get('creatures', {})
 people = data.get('people', {})
 scenes = data.get('scenes', {})
 sounds = data.get('sounds', {})
-
 
 # Function to randomly select a description from a dictionary
 def get_random_object(data_dict):
