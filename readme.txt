@@ -1,4 +1,4 @@
-readme / various useful commands
+readme / various useful commands / fw29
 
 # error logs
 cat /var/log/fw29/fw29_log.out.log

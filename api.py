@@ -6,6 +6,7 @@ import re
 import random
 import json
 import requests
+import logging
 from dotenv import load_dotenv
 from openai import OpenAI
 from datetime import datetime, timedelta
@@ -16,7 +17,7 @@ from email.mime.text import MIMEText
 
 load_dotenv()
 
-dirname = os.path.dirname(__file__)
+logging.basicConfig(level=logging.INFO)
 
 package = ""
 
@@ -28,9 +29,101 @@ api_key = os.getenv("OPENAI_API_KEY")
 # Email configurations
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-# RECIPIENT_EMAILS = ["weil.flora@gmail.com"]  # Change this to the recipient's email address
-RECIPIENT_EMAILS = ["zhexi@mit.edu"]  # Change this to the recipient's email address
-BCC_EMAIL = ["gary.zhexi.zhang@gmail.com"]
+BCC_EMAIL = [""]
+
+# Directory paths
+dirname = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))  # Root directory
+data_dir = os.path.join(dirname, 'DRW-server/data')  # "data" directory in the root folder
+
+# Mail-list paths
+MAIL_LIST_FILE = os.path.join(data_dir, "mail-list")
+UNSUBSCRIBE_LIST_FILE = os.path.join(data_dir, "unsubscribe-list")
+
+def ensure_file_exists(file_path, initial_content=None):
+    """Ensure the file exists; create it if it doesn't, with optional initial content."""
+    if not os.path.exists(file_path):
+        with open(file_path, 'w') as f:
+            if initial_content:
+                f.write(initial_content + '\n')
+        print(f"Created file: {file_path}")
+
+
+def get_recipient_emails(mail_list_file, unsubscribe_list_file):
+    """Read the mail list and remove any emails present in the unsubscribe list."""
+    # Ensure mail-list and unsubscribe-list files exist
+    ensure_file_exists(mail_list_file, initial_content="gary.zhexi.zhang@gmail.com")
+    ensure_file_exists(unsubscribe_list_file)
+
+    try:
+        # Read emails from the mail list file
+        with open(mail_list_file, 'r') as f:
+            mail_list = set(line.strip() for line in f if line.strip())
+
+        # Read emails from the unsubscribe list file
+        with open(unsubscribe_list_file, 'r') as f:
+            unsubscribe_list = set(line.strip() for line in f if line.strip())
+
+        # Remove any emails from the mail list that are in the unsubscribe list
+        filtered_mail_list = list(mail_list - unsubscribe_list)
+
+        # Update the mail-list file with the filtered emails
+        with open(mail_list_file, 'w') as f:
+            for email in filtered_mail_list:
+                f.write(email + '\n')
+
+        return filtered_mail_list
+
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        return []
+
+def send_email(package):
+    # Get the filtered recipient emails
+    recipient_emails = get_recipient_emails(MAIL_LIST_FILE, UNSUBSCRIBE_LIST_FILE)
+    
+    if not recipient_emails:
+        print("No valid recipient emails found. Exiting...")
+        return
+    
+    # Create the MIMEMultipart object for the email message
+    msg = MIMEMultipart()
+    msg['From'] = EMAIL_ADDRESS
+    msg['To'] = ", ".join(recipient_emails)
+    msg['Subject'] = f"{package['haiku']}"
+
+    # Construct the email body using HTML
+    body = f"""
+    <p><i>{package['interpretation']}</i></p>
+    <p>{datetime.now()}</p>
+    <p><a href="https://unsubscribe.link">Unsubscribe link</a></p>
+    """
+
+    # Attach the HTML body to the email message
+    msg.attach(MIMEText(body, 'html'))
+
+    try:
+        # Connect to the SMTP server
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()  # Start TLS encryption
+            server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)  # Login to the server
+            # Send the email to the recipients, including BCC
+            server.sendmail(
+                EMAIL_ADDRESS, 
+                recipient_emails + BCC_EMAIL, 
+                msg.as_string()
+            )
+        logging.info(f"Successfully sent email to {recipient_emails + BCC_EMAIL}")
+
+    except Exception as e:
+        
+        logging.error(f"An error occurred while sending email: {e}")
+
+
+# Example usage with a sample package dictionary
+package = {
+    'haiku': 'An autumn breeze flows',
+    'interpretation': 'The crisp air signifies the change of seasons and new beginnings.'
+}
 
 # Function to load data from a JSON file
 def load_json_data(file_path):
@@ -49,8 +142,6 @@ def load_json_data(file_path):
 # Function to load all data from the "data" directory in the root folder
 def load_data():
     data_files = {}
-    dirname = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))  # Root directory
-    data_dir = os.path.join(dirname, 'DRW-server/data')  # "data" directory in the root folder
 
     # List all JSON files in the "data" directory
     for filename in os.listdir(data_dir):
@@ -82,19 +173,6 @@ def get_random_object(data_dict):
         return random.choice(list(data_dict.values()))
     return None
 
-# def get_random_object(data_dict):
-#     if isinstance(data_dict, dict) and data_dict:
-#         # Randomly select a key from the dictionary
-#         selected_key = random.choice(list(data_dict.keys()))
-#         # Get the corresponding object and its description
-#         selected_object = data_dict[selected_key]
-#         # Return both the selected object and its description
-#         return {
-#             "name": selected_key,
-#             "description": selected_object.get("description", "")
-#         }
-#     return None
-
 # Cache management functions
 CACHE_FILE = 'cache.pkl'
 
@@ -107,26 +185,6 @@ def load_cache():
 def save_cache(data):
     with open(CACHE_FILE, 'wb') as f:
         pickle.dump(data, f)
-
-def send_email(package):
-    msg = MIMEMultipart()
-    msg['From'] = EMAIL_ADDRESS
-    msg['To'] = ", ".join(RECIPIENT_EMAILS)
-    msg['Subject'] = f""" {package['haiku']} """
-
-    body = f"""
-    <p><i>{package['interpretation']}</i></p>
-    <p>{datetime.now()}</p>
-    <p>Unsubscribe link</p>
-
-    """
-
-    msg.attach(MIMEText(body, 'html'))
-
-    with smtplib.SMTP('smtp.gmail.com', 587) as server:
-        server.starttls()
-        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-        server.sendmail(EMAIL_ADDRESS, RECIPIENT_EMAILS + BCC_EMAIL, msg.as_string())
 
 def generate_message():
 
@@ -153,7 +211,7 @@ def generate_message():
     print("\n")
     print("reading fragments")
 
-    prompt = f"take these fragments and assemble loose, ethnographic journal entry of what you have seen today. less than 80 words. no detail is too small or mundane. describe what you did today. your language is practical, you are scribbling them down at the end of the day, inspired but terse and tired {package}"
+    prompt = f"take these fragments and assemble loose, ethnographic journal entry of what you have seen today. less than 80 words. no detail is too small or mundane. your language is practical, obsessive but terse {package}"
 
     completion = client.chat.completions.create(
         model="gpt-4o",
@@ -172,31 +230,18 @@ def generate_message():
     print("compiled fragments", package['haiku'])
     print("constructing narrative")
 
-    prompt = f"make an alternative version of these notes, drawing on desert meterology, geoengineering, ecology. there's no need to copy every aspect, but make up new details for what you pick up. describe today's events in order, no detail is too small. days are often are mundane. you are NOT POETIC, almost autistically dry. madness is teasing you and at times you dream and hallucinate, it is harder and harder to tell what is reality; do not mention this explicitly. less than 150 words {poem}"
+    prompt = f"make an alternative version of these notes, drawing on desert meterology, geoengineering, ecology. further elaborate on the details you pick up. describe today's events in order, no detail is too small. days are often are mundane. you are NOT POETIC, almost autistically dry. madness is teasing you, it is harder and harder to tell words and reality apart (do not mention this explicitly). less than 150 words. use html formatting and spacing slightly insanely to space and style your transmission, based on the content. end on a set of geographical coordinates, unmarked, relevant to your message. do not use a title. {poem}"
 
     completion = client.chat.completions.create(
-        # model="gpt-4o",
+        model="gpt-4o",
         # model="gpt-3.5-turbo",
-        model="gpt-4",
+        # model="gpt-4",
         messages=[
-            {"role": "system", "content": "you are a consultant anthropologist working on exploration for new minerals for climate technology. you are weary. write your internal corporate report in the style of Cormac McCarthy."},
+            {"role": "system", "content": "you are an anonymous consultant anthropologist working on exploration for new minerals, potentially for geo-engineering technology for a chinese firm. you have an interest in mysticism. your remarks are specific, do not make broad new-age sentiments, there is no need to conclude your remarks. you are weary. write your internal corporate report, in the style of the CCRU, Nick Land, Haruki Murakami. today's date tell's you the season."},
             {"role": "user", "content": prompt}
         ]
     )
 
-
-
-    # prompt = f"interpret these notes and make observations of your own. who could she be? she's like an alien, trying to observe you from the land. you write to her in the tone of a curious child, she is funny to you, but you also pity her a little, down there. don't use gendered terms, refer to her only as stranger. less than 100 words {poem}"
-
-    # completion = client.chat.completions.create(
-    #     # model="gpt-4o",
-    #     # model="gpt-3.5-turbo",
-    #     model="gpt-4",
-    #     messages=[
-    #         {"role": "system", "content": "you are the wind, witnessing this weary ethnographer's landbound struggle to understand your world from their terrestrial dimension. this is your world, you float freely. You write in first person but use I sparingly. your style is curious but a little tentative. your language is never flowery, using adjectives sparingly."},
-    #         {"role": "user", "content": prompt}
-    #     ]
-    # )
 
     interpretation = completion.choices[0].message.content
     package['interpretation'] = str(interpretation.replace("\n", " "))
@@ -212,11 +257,6 @@ def generate_message():
 
     print("saved package as cache_data")
     print("\n\n")
-
-
-    # Send the package via email
-    # print(datetime.now(), "sending package as email to", RECIPIENT_EMAILS, BCC_EMAIL)
-    # send_email(package)
 
     return package
 
@@ -236,6 +276,8 @@ def get_oracle():
             print(datetime.now(), "\n\n")
             print("cached message: \n\n", package['haiku'], "\n\n")
             print("interpretation: \n\n", package['interpretation'], "\n")
+            send_email(package)
+
     else:
         print(datetime.now(), "no cache message found! generating new message.")
         print("\n")
@@ -248,7 +290,9 @@ get_oracle()
 @app.route('/')
 def home():
     package = load_cache()
-    return package
+    if package:
+        return jsonify(package['message'])
+    return jsonify({"error": "No data available"}), 404
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, use_reloader=False)
