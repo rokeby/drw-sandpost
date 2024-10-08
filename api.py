@@ -9,7 +9,7 @@ import requests
 import logging
 from dotenv import load_dotenv
 from openai import OpenAI
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import pickle
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -35,9 +35,10 @@ BCC_EMAIL = [""]
 dirname = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))  # Root directory
 data_dir = os.path.join(dirname, 'DRW-server/data')  # "data" directory in the root folder
 
-# Mail-list paths
+# File paths
 MAIL_LIST_FILE = os.path.join(data_dir, "mail-list")
 UNSUBSCRIBE_LIST_FILE = os.path.join(data_dir, "unsubscribe-list")
+ARCHIVE_FILE = os.path.join(data_dir, "message_archive.json")
 
 def ensure_file_exists(file_path, initial_content=None):
     """Ensure the file exists; create it if it doesn't, with optional initial content."""
@@ -89,11 +90,11 @@ def send_email(package):
     msg = MIMEMultipart()
     msg['From'] = EMAIL_ADDRESS
     msg['To'] = ", ".join(recipient_emails)
-    msg['Subject'] = f"{package['haiku']}"
+    msg['Subject'] = f"sandpost, {datetime.now(timezone.utc)}"
 
     # Construct the email body using HTML
     body = f"""
-    <p><i>{package['interpretation']}</i></p>
+    <p><i>{package['report']}</i></p>
     <p>{datetime.now()}</p>
     <p><a href="https://unsubscribe.link">Unsubscribe link</a></p>
     """
@@ -118,13 +119,6 @@ def send_email(package):
         
         logging.error(f"An error occurred while sending email: {e}")
 
-
-# Example usage with a sample package dictionary
-package = {
-    'haiku': 'An autumn breeze flows',
-    'interpretation': 'The crisp air signifies the change of seasons and new beginnings.'
-}
-
 # Function to load data from a JSON file
 def load_json_data(file_path):
     with open(file_path, 'r') as f:
@@ -148,7 +142,7 @@ def load_data():
         if filename.endswith('.json'):
             key = os.path.splitext(filename)[0]  # Filename without extension
             file_path = os.path.join(data_dir, filename)
-            print(f"Loading file: {file_path}")
+            print(f"Loading file: {filename}")
             data = load_json_data(file_path)
             if data is not None:
                 data_files[key] = data
@@ -188,8 +182,7 @@ def save_cache(data):
 
 def generate_message():
 
-    print("running generate_message()")
-    print("\n")
+    print("generating new message at", datetime.now(), "\n")
 
     # Create the package with randomized fragments
     package = {
@@ -208,8 +201,7 @@ def generate_message():
         else:
             print(f"{key.capitalize()}: None")
 
-    print("\n")
-    print("reading fragments")
+    print("\nreading fragments \n")
 
     prompt = f"take these fragments and assemble loose, ethnographic journal entry of what you have seen today. less than 80 words. no detail is too small or mundane. your language is practical, obsessive but terse {package}"
 
@@ -225,12 +217,12 @@ def generate_message():
 
     poem = completion.choices[0].message.content
 
-    package['haiku'] = str(poem.replace("\n", " "))
+    package['fragment'] = str(poem.replace("\n", " "))
 
-    print("compiled fragments", package['haiku'])
-    print("constructing narrative")
+    # print("compiled fragments:", package['fragment'], "\n")
+    print("constructing report")
 
-    prompt = f"make an alternative version of these notes, drawing on desert meterology, geoengineering, ecology. further elaborate on the details you pick up. describe today's events in order, no detail is too small. days are often are mundane. you are NOT POETIC, almost autistically dry. madness is teasing you, it is harder and harder to tell words and reality apart (do not mention this explicitly). less than 150 words. use html formatting and spacing slightly insanely to space and style your transmission, based on the content. end on a set of geographical coordinates, unmarked, relevant to your message. do not use a title. {poem}"
+    prompt = f"make an alternative version of these notes, drawing on desert meterology, geoengineering, ecology. further elaborate on the details you pick up. describe today's events in order, no detail is too small. days are often are mundane. you are NOT POETIC, almost autistically dry. madness is closing in on you, it is harder and harder to tell words and reality apart (do not mention this explicitly). less than 150 words. use html formatting and spacing insanely to space and style your transmission, based on the content. end on a set of geographical coordinates, unmarked, relevant to your message. do not use a title. {poem}"
 
     completion = client.chat.completions.create(
         model="gpt-4o",
@@ -242,11 +234,10 @@ def generate_message():
         ]
     )
 
+    report = completion.choices[0].message.content
+    package['report'] = str(report.replace("\n", " "))
 
-    interpretation = completion.choices[0].message.content
-    package['interpretation'] = str(interpretation.replace("\n", " "))
-
-    print("completed interpretation", package['interpretation'])
+    # print("completed report", package['report'])
 
     # Save the generated message with a timestamp
     cache_data = {
@@ -256,7 +247,6 @@ def generate_message():
     save_cache(cache_data)
 
     print("saved package as cache_data")
-    print("\n\n")
 
     return package
 
@@ -264,26 +254,55 @@ def get_oracle():
     cache_data = load_cache()
     if cache_data:
         cache_timestamp = cache_data['timestamp']
-        if datetime.now() - cache_timestamp < timedelta(seconds=1):
+        # timedelta set at 1 second for testing, should be 24h! 
+        if datetime.now() - cache_timestamp < timedelta(seconds=1): 
             # Serve the cached message
-            print("initiated", datetime.now(), "\n cached message less than 1 second old,", "\n generated at:", cache_timestamp, "\n returning cached message \n", cache_data["message"])
+            print("cached message less than 1 second old,", "\n generated at:", cache_timestamp, "\n returning cached message \n", cache_data["message"])
             print("\n")
             return cache_data['message']
         else:
-            print(datetime.now(), "cached message more than a second old, (", cache_timestamp, ") generating new message")
-            print("\n")
+            print("\ncached message more than a second old")
             package = generate_message()
-            print(datetime.now(), "\n\n")
-            print("cached message: \n\n", package['haiku'], "\n\n")
-            print("interpretation: \n\n", package['interpretation'], "\n")
+            print(datetime.now(), "\n")
+            print("cached message: \n\n", package['fragment'], "\n")
+            print("report: \n\n", package['report'], "\n")
+            append_to_archive(package)
             send_email(package)
-
     else:
-        print(datetime.now(), "no cache message found! generating new message.")
+        print("no cache message found! generating new message at", datetime.now())
         print("\n")
         package = generate_message()
         print(datetime.now(), "\n", "cached message:", package)        
+        append_to_archive(package)
 
+def append_to_archive(package):
+    """Append the new package to the archive file."""
+    ensure_file_exists(ARCHIVE_FILE, initial_content="")
+    
+    try:
+        # Load the existing archive data
+        with open(ARCHIVE_FILE, 'r') as f:
+            try:
+                archive_data = json.load(f)
+                if not isinstance(archive_data, list):
+                    archive_data = []  # Initialize as an empty list if it's not a list
+            except json.JSONDecodeError:
+                archive_data = []  # Initialize as an empty list if the file is empty or invalid
+
+        # Add a timestamp to the package and append it to the archive
+        archive_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "message": package
+        }
+        archive_data.append(archive_entry)
+        
+        # Save the updated archive data
+        with open(ARCHIVE_FILE, 'w') as f:
+            json.dump(archive_data, f, indent=4)
+        logging.info("Appended new message to the archive.")
+    
+    except Exception as e:
+        logging.error(f"An error occurred while archiving the message: {e}")
 
 get_oracle()
 
