@@ -1,0 +1,170 @@
+{
+  "wind_howling_rock_formations": {
+    "name": "Wind Howling through Rock Formations",
+    "description": "The eerie howling of the wind as it weaves through ancient, twisted rock formations"
+  },
+  "wind_canyon_lament": {
+    "name": "Wind Canyon Lament",
+    "description": "The low moan of wind funneling through narrow desert canyons, like a distant lament"
+  },
+  "wind_cliff_whistle": {
+    "name": "Wind Cliff Whistle",
+    "description": "The high-pitched whistling of wind slicing through jagged cliffs at twilight"
+  },
+  "sand_cascading_dune": {
+    "name": "Sand Cascading Dune",
+    "description": "The hypnotic whisper of sand grains cascading down a steep dune face"
+  },
+  "sand_sifting_crest": {
+    "name": "Sand Sifting Crest",
+    "description": "The soft, rhythmic sifting of sand as it tumbles over a dune crest"
+  },
+  "sand_flowing_stones": {
+    "name": "Sand Flowing Around Stones",
+    "description": "The gentle, persistent rasp of sand flowing around sun-scorched stones"
+  },
+  "lark_flute_calls": {
+    "name": "Lark Flute Calls",
+    "description": "The haunting, flute-like calls of the rare Mongolian lark echoing across the vast expanse"
+  },
+  "eagle_cry_plains": {
+    "name": "Eagle Cry Plains",
+    "description": "The mournful cry of a lone steppe eagle soaring above the barren plains"
+  },
+  "wheatear_warble_outcrop": {
+    "name": "Wheatear Warble Outcrop",
+    "description": "The melodic warble of a desert wheatear perched on a rocky outcrop"
+  },
+  "crickets_chirping_stars": {
+    "name": "Crickets Chirping Under Stars",
+    "description": "The persistent, almost mechanical chirping of bioluminescent desert crickets under the stars"
+  },
+  "cicada_clicks_grass": {
+    "name": "Cicada Clicks Among Grass",
+    "description": "The sharp, staccato clicks of a solitary cicada hidden among dry grass"
+  },
+  "beetle_buzzing_air": {
+    "name": "Beetle Buzzing Through Air",
+    "description": "The eerie, rhythmic buzzing of a night-active beetle flitting through the air"
+  },
+  "camel_grunts_sands": {
+    "name": "Camel Grunts in Sands",
+    "description": "The guttural, almost conversational grunts of Bactrian camels trudging through moonlit sands"
+  },
+  "yak_bellows_vegetation": {
+    "name": "Yak Bellows Grazing",
+    "description": "The deep, resonant bellows of wild yaks grazing on sparse desert vegetation"
+  },
+  "leopard_growl_edge": {
+    "name": "Leopard Growl at Edge",
+    "description": "The low, rumbling growl of a distant snow leopard prowling near the desert edge"
+  },
+  "footsteps_crunch_salt": {
+    "name": "Footsteps Crunch on Salt",
+    "description": "The sharp, crunching sound of footsteps breaking through a crust of sun-baked salt flats"
+  },
+  "hooves_thud_earth": {
+    "name": "Hooves Thudding on Earth",
+    "description": "The muffled thud of hooves as a herd of wild asses trots across hard-packed earth"
+  },
+  "mud_crackle_wanderer": {
+    "name": "Mud Crackle Under Wanderer",
+    "description": "The brittle crackle of dried mud breaking under the weight of a solitary wanderer"
+  },
+  "fox_yips_dunes": {
+    "name": "Fox Yips Across Dunes",
+    "description": "The distant, otherworldly yips of desert foxes communicating across the dunes"
+  },
+  "wolves_howls_fringe": {
+    "name": "Wolves Howling at Fringe",
+    "description": "The plaintive howls of a pack of wolves hunting along the desert fringe"
+  },
+  "fox_barks_twilight": {
+    "name": "Fox Barks in Twilight",
+    "description": "The short, sharp barks of a red fox echoing through the twilight"
+  },
+  "spring_babble_minerals": {
+    "name": "Spring Babble with Minerals",
+    "description": "The unexpected babble of a hidden spring, its water tinged with the scent of ancient minerals"
+  },
+  "stream_gurgle_oasis": {
+    "name": "Stream Gurgle in Oasis",
+    "description": "The gurgling laughter of a tiny, secluded stream winding through a rocky oasis"
+  },
+  "droplets_plinking_pool": {
+    "name": "Droplets Plinking in Pool",
+    "description": "The gentle plinking of water droplets falling into a clear, deep desert pool"
+  },
+  "herders_chanting_jewelry": {
+    "name": "Herders Chanting with Jewelry",
+    "description": "The faint, rhythmic chanting of nomadic herders blending with the gentle clinking of their jewelry"
+  },
+  "elders_song_campfire": {
+    "name": "Elder's Song by Campfire",
+    "description": "The soft murmur of an elder’s song carried on the wind from a distant campfire"
+  },
+  "instrument_hum_stars": {
+    "name": "Instrument Hum Under Stars",
+    "description": "The quiet, melodious hum of a traditional string instrument played under the stars"
+  },
+  "bushes_rustle_spirits": {
+    "name": "Bushes Rustling Like Spirits",
+    "description": "The dry, rattling rustle of thorny saxaul bushes, sounding like the whispers of long-forgotten spirits"
+  },
+  "reeds_clatter_lake": {
+    "name": "Reeds Clattering by Lake",
+    "description": "The brittle clatter of dry reeds swaying in the breeze near an ephemeral lake"
+  },
+  "grasses_rustle_creature": {
+    "name": "Grasses Rustling by Creature",
+    "description": "The subtle hiss of desert grasses bending and snapping under the weight of a small creature"
+  },
+  "viper_hiss_sand": {
+    "name": "Viper Hiss Beneath Sand",
+    "description": "The almost imperceptible hiss of a horned viper gliding just beneath the sand's surface"
+  },
+  "lizard_scrape_dunes": {
+    "name": "Lizard Scraping Dunes",
+    "description": "The stealthy scrape of a sandfish lizard burrowing into the warm dunes"
+  },
+  "scarab_rustle_soil": {
+    "name": "Scarab Rustling in Soil",
+    "description": "The delicate rustle of a scarab beetle navigating through dry, loose soil"
+  },
+  "thunder_boom_storm": {
+    "name": "Thunder Boom During Storm",
+    "description": "The sudden, cracking boom of thunder reverberating off the desert floor during a rare storm"
+  },
+  "thunder_rumble_landscape": {
+    "name": "Thunder Rumble Over Landscape",
+    "description": "The ominous rumble of distant thunder rolling over the barren landscape"
+  },
+  "lightning_crackle_plain": {
+    "name": "Lightning Crackle Over Plain",
+    "description": "The sharp crackle of lightning splitting the sky above a parched desert plain"
+  },
+  "vehicle_growl_landscape": {
+    "name": "Vehicle Growl Across Landscape",
+    "description": "The distant, low growl of an off-road vehicle echoing like a phantom through the desolate landscape"
+  },
+  "motorcycle_hum_canyons": {
+    "name": "Motorcycle Hum in Canyons",
+    "description": "The faint hum of a motorcycle engine reverberating off distant canyon walls"
+  },
+  "caravan_clank_routes": {
+    "name": "Caravan Clank Along Routes",
+    "description": "The metallic clank of a caravan’s wheels as it traverses ancient trade routes"
+  },
+  "sandstorm_roar_instruments": {
+    "name": "Sandstorm Roar with Instruments",
+    "description": "The overpowering, deafening roar of a sandstorm, with the sand particles striking like tiny, relentless percussion instruments"
+  },
+  "sandstorm_hiss_tent": {
+    "name": "Sandstorm Hiss Against Tent",
+    "description": "The relentless hiss of sand whipping against a tent during a fierce gale"
+  },
+  "dust_whirlwind_flurry": {
+    "name": "Dust Whirlwind Flurry",
+    "description": "The chaotic flurry of grit and dust swirling around in a sudden desert whirlwind"
+  }
+}
